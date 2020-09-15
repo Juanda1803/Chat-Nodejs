@@ -17,13 +17,42 @@ const addMessage = (user, messsage) => {
   });
 };
 
-const getMessage = () => {
+const getMessage = (filterUser) => {
   return new Promise((resolve, reject) => {
-    resolve(store.list());
+    resolve(store.list(filterUser));
+  });
+};
+
+const updateMessage = (id, message) => {
+  return new Promise(async (resolve, reject) => {
+    if (!id || !message) {
+      reject("Invalid data");
+      return false;
+    }
+    const result = await store.updateText(id, message);
+    resolve(result);
+  });
+};
+
+const deleteMessage = (id) => {
+  return new Promise((resolve, reject) => {
+    if (!id) {
+      reject("Id invalid");
+    }
+    store
+      .remove(id)
+      .then(() => {
+        resolve();
+      })
+      .catch((e) => {
+        reject(e);
+      });
   });
 };
 
 module.exports = {
   addMessage,
   getMessage,
+  updateMessage,
+  deleteMessage,
 };
