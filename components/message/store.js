@@ -1,35 +1,49 @@
-const Model = require("./model");
+const Model = require('./model');
 
-const addMessage = (message) => {
-  const myMessage = new Model(message);
-  myMessage.save();
-};
+function addMessage(message) {
+    const myMessage = new Model(message);
+    myMessage.save();
+}
 
-const getMessage = async (filterUser) => {
-  let filter = {};
-  if (filterUser !== null) {
-    filter = { user: filterUser };
-  }
-  const messages = await Model.find(filter);
-  return messages;
-};
+async function getMessages(filterChat) {
+    return new Promise((resolve, reject) => {
+        let filter = {};
+        if (filterChat !== null) {
+            filter = { chat: filterChat };
+        }
+        Model.find(filter)
+            .populate('user')
+            .exec((error, populated) => {
+                if (error) {
+                    reject(error);
+                    return false;
+                }
 
-const updateText = async (id, message) => {
-  const foundMessage = await Model.findById(id);
-  foundMessage.message = message;
-  const newMessage = await foundMessage.save();
-  return newMessage;
-};
+                resolve(populated);
+            });
+    })
+}
 
-const removeMessage = (id) => {
-  return Model.deleteOne({
-    _id: id,
-  });
-};
+function removeMessage(id) {
+    return Model.deleteOne({
+        _id: id
+    });
+}
+
+async function updateText(id, message) {
+    const foundMessage = await Model.findOne({
+        _id: id
+    });
+
+    foundMessage.message = message;
+
+    const newMessage = await foundMessage.save();
+    return newMessage;
+}
 
 module.exports = {
-  add: addMessage,
-  list: getMessage,
-  updateText: updateText,
-  remove: removeMessage,
-};
+    add: addMessage,
+    list: getMessages,
+    updateText: updateText,
+    remove: removeMessage,
+}
